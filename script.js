@@ -60,20 +60,10 @@ function renderScores(sports) {
     sportDiv.innerHTML = `<h2 class="sport-title">${sport}</h2>`;
 
     // Ordina i dati per data
-    sports[sport].sort((a, b) => {
-      const dateA = a.formattedDate ? parseFormattedDate(a.formattedDate) : parseTimestamp(a.timestamp);
-      const dateB = b.formattedDate ? parseFormattedDate(b.formattedDate) : parseTimestamp(b.timestamp);
-      if (dateA && dateB) return dateB - dateA;
-      else if (dateA) return -1;
-      else if (dateB) return 1;
-      else return 0;
-    });
-
-    // Crea le card per ogni incontro
     sports[sport].forEach(match => {
       const card = document.createElement('div');
-      card.className = 'card';
-
+      card.className = 'card col-md-4'; // Utilizza Bootstrap per il layout delle card
+    
       // Determina la data da visualizzare
       let displayedDate = 'N/A';
       if (match.formattedDate) {
@@ -82,22 +72,28 @@ function renderScores(sports) {
         const parsedDate = parseTimestamp(match.timestamp);
         displayedDate = parsedDate ? parsedDate.toLocaleDateString('it-IT') : 'N/A';
       }
-
-      card.className = 'card col-md-4'; // Colonne di Bootstrap (3 card per riga su schermi medi)
-
-card.innerHTML = `
-  <div class="card-body">
-    <h3 class="card-title">${match.player1} vs ${match.player2}</h3>
-    <p class="card-text"><strong>Score:</strong> ${match.score1} - ${match.score2}</p>
-    <p class="card-text"><strong>Date:</strong> ${displayedDate}</p>
-  </div>
-`;
-
+    
+      card.innerHTML = `
+        <div class="card-body">
+          <h3 class="card-title">${match.player1} vs ${match.player2}</h3>
+          <p class="card-text"><strong>Score:</strong> ${match.score1} - ${match.score2}</p>
+          <p class="card-text"><strong>Date:</strong> ${displayedDate}</p>
+        </div>
+      `;
       sportDiv.appendChild(card);
     });
-
-    scoresContainer.appendChild(sportDiv);
-  }
+    
+    // Funzione per parsare i timestamp
+    function parseTimestamp(timestamp) {
+      try {
+        const date = new Date(timestamp);
+        return isNaN(date) ? null : date;
+      } catch (error) {
+        console.error("Error parsing timestamp:", error, timestamp);
+        return null;
+      }
+    }
+    
 }
 
 // Funzione per parsare i timestamp
