@@ -5,22 +5,35 @@ body {
   color: #333; /* Default text color */
 }
 
-.container {
+.card-container { /* New container for the cards within each sport */
   display: flex;
   flex-wrap: wrap;
-  justify-content: center; /* Center the cards horizontally */
+  justify-content: center; /* Center the cards */
+  width: 100%; /* Occupy 100% of the container width */
 }
 
 .card {
-  border: none; 
-  width: 18rem;
+  width: calc(33.33% - 30px); /* One third width minus margins */
+  max-width: calc(33.33% - 30px);
+  margin: 15px;
+  box-sizing: border-box; /* Include padding and border in width/height */
+  border: none;
   border-radius: 10px; 
   padding: 15px;
-  margin: 15px;
-  width: 300px;
   background-color: #ffffff; 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
   transition: transform 0.3s ease, box-shadow 0.3s ease; 
+}
+
+.card * { /* Scale all children of the card */
+  font-size: inherit; /* Inherit font size from card */
+}
+
+@media (max-width: 768px){
+  .card{
+      width: 90%;
+      max-width: 90%;
+  }
 }
 
 .card:hover {
@@ -43,10 +56,11 @@ body {
 }
 
 .sport-title {
+  width: 100%; /* Occupy 100% of container width */
   text-align: center;
   margin-bottom: 20px;
   font-size: 1.8rem;
   font-weight: bold;
-  color: #222; /* Stronger emphasis for section titles */
+  color: #222;
 }
 
