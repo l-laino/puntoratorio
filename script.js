@@ -82,13 +82,13 @@ function renderScores(sports) {
           : "N/A";
       }
 
-      card.innerHTML = `
+      card.innerHTML = 
         <div class="card-body">
           <h3 class="card-title">${match.player1} vs ${match.player2}</h3>
           <p class="card-text"><strong>Score:</strong> ${match.score1} - ${match.score2}</p>
           <p class="card-text"><strong>Date:</strong> ${displayedDate}</p>
         </div>
-      `;
+      ;
       sportDiv.appendChild(card);
     });
 
