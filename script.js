@@ -111,7 +111,7 @@ function parseTimestamp(timestamp) {
 function parseFormattedDate(formattedDate) {
   try {
     const [day, month, year] = formattedDate.split('/').map(num => parseInt(num, 10));
-    return new Date(year, month - 1, day); // JavaScript usa mesi da 0 a 11
+    return new Date(day, month - 1, year); // JavaScript usa mesi da 0 a 11
   } catch (error) {
     console.error("Error parsing formatted date:", error, formattedDate);
     return null;

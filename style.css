@@ -1,32 +1,51 @@
 body {
-    font-family: sans-serif;
-    margin: 20px;
-  }
-  
-  .container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* Center the cards */
-  }
-  
-  .card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 10px;
-    margin: 10px;
-    width: 300px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
-    background-color: #f9f9f9; /* Light background */
-  }
-  
-  .card h2 {
-    margin-top: 0;
-    color: #333;
-  }
-  
-  .sport-title {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.5em;
-    font-weight: bold;
-  }
+  font-family: Arial, sans-serif; /* Cleaner and widely supported font */
+  margin: 20px;
+  background-color: #f5f5f5; /* Subtle background for contrast */
+  color: #333; /* Default text color */
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Center the cards horizontally */
+}
+
+.card {
+  border: none; /* Remove the solid border for a cleaner look */
+  border-radius: 10px; /* Slightly more rounded corners */
+  padding: 15px;
+  margin: 15px;
+  width: 300px;
+  background-color: #ffffff; /* Pure white for the card background */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Stronger shadow for more depth */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
+}
+
+.card:hover {
+  transform: translateY(-8px); /* Lift the card on hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Slightly stronger shadow on hover */
+}
+
+.card h2, .card h5 {
+  margin-top: 0;
+  color: #444; /* Softer title color */
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.card p {
+  margin: 10px 0;
+  font-size: 1rem;
+  line-height: 1.5; /* Better readability */
+  color: #555; /* Softer text color */
+}
+
+.sport-title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #222; /* Stronger emphasis for section titles */
+}
+
