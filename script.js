@@ -6,71 +6,79 @@ const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tq
 fetch(url)
   .then(res => res.text())
   .then(text => {
-    const json = JSON.parse(text.substring(47).slice(0, -2));
-    const data = json.table.rows;
+    try {
+      const json = JSON.parse(text.substring(47).slice(0, -2));
+      const data = json.table.rows;
+      processScores(data);
+    } catch (error) {
+      console.error("Error parsing JSON:", error);
+    }
+  })
+  .catch(error => {
+    console.error("Fetch failed:", error);
+  });
 
-    const scoresContainer = document.getElementById('scores-container');
-    const sports = {};
+function processScores(data) {
+  const scoresContainer = document.getElementById('scores-container');
+  if (!scoresContainer) {
+    console.error("Scores container not found in DOM");
+    return;
+  }
 
-    data.forEach(row => {
-      const timestamp = row.c[0] ? row.c[0].v : null; // Timestamp (column A)
-      const sport = row.c[2] ? row.c[2].v : ''; // Sport (column C)
-      const player1 = row.c[3] ? row.c[3].v : ''; // Player 1 (column D)
-      const score1 = row.c[4] ? row.c[4].v : ''; // Score 1 (column E)
-      const player2 = row.c[5] ? row.c[5].v : ''; // Player 2 (column F)
-      const score2 = row.c[6] ? row.c[6].v : ''; // Score 2 (column G)
-      const formattedDate = row.c[7] ? row.c[7].v : ''; // Date (column H)
+  scoresContainer.innerHTML = ''; // Clear previous content
+  const sports = {};
 
-      if (!sports[sport]) {
-        sports[sport] = [];
-      }
-      sports[sport].push({ player1, score1, player2, score2, timestamp, formattedDate });
+  data.forEach(row => {
+    const timestamp = row.c[0] ? row.c[0].v : null;
+    const sport = row.c[2] ? row.c[2].v : '';
+    const player1 = row.c[3] ? row.c[3].v : '';
+    const score1 = row.c[4] ? row.c[4].v : '';
+    const player2 = row.c[5] ? row.c[5].v : '';
+    const score2 = row.c[6] ? row.c[6].v : '';
+    const formattedDate = row.c[7] ? row.c[7].v : '';
+
+    if (!sports[sport]) {
+      sports[sport] = [];
+    }
+    sports[sport].push({ player1, score1, player2, score2, timestamp, formattedDate });
+  });
+
+  renderScores(sports);
+}
+
+function renderScores(sports) {
+  const scoresContainer = document.getElementById('scores-container');
+
+  for (const sport in sports) {
+    const sportDiv = document.createElement('div');
+    sportDiv.innerHTML = `<h2 class="sport-title">${sport}</h2>`;
+
+    sports[sport].sort((a, b) => {
+      const dateA = a.formattedDate ? new Date(a.formattedDate) : (a.timestamp ? new Date(a.timestamp) : null);
+      const dateB = b.formattedDate ? new Date(b.formattedDate) : (b.timestamp ? new Date(b.timestamp) : null);
+      if (dateA && dateB) return dateB - dateA;
+      else if (dateA) return -1;
+      else if (dateB) return 1;
+      else return 0;
     });
 
-    for (const sport in sports) {
-      const sportDiv = document.createElement('div');
-      sportDiv.innerHTML = `<h2 class="sport-title">${sport}</h2>`;
+    sports[sport].forEach(match => {
+      const card = document.createElement('div');
+      card.className = 'card';
 
-      sports[sport].sort((a, b) => {
-        // Prioritize formatted date over timestamp for sorting
-        const dateA = a.formattedDate ? new Date(a.formattedDate) : (a.timestamp ? new Date(a.timestamp) : null);
-        const dateB = b.formattedDate ? new Date(b.formattedDate) : (b.timestamp ? new Date(b.timestamp) : null);
-        if (dateA && dateB) {
-          return dateB - dateA;
-        } else if (dateA) {
-          return -1; // a is valid, b is not
-        } else if (dateB) {
-          return 1; // b is valid, a is not
-        } else {
-          return 0; // neither is valid
-        }
-      });
+      let displayedDate = match.formattedDate || 'N/A';
+      if (!displayedDate && match.timestamp) {
+        const date = new Date(match.timestamp);
+        displayedDate = isNaN(date) ? 'Invalid Date' : date.toLocaleDateString('it-IT');
+      }
 
-      sports[sport].forEach(match => {
-        const card = document.createElement('div');
-        card.className = 'card';
-
-        let displayedDate = match.formattedDate || 'N/A'; // Use formatted date if available, else N/A
-
-        if (!displayedDate && match.timestamp) {
-          try {
-            const date = new Date(match.timestamp);
-            if (!isNaN(date)) {
-              displayedDate = date.toLocaleDateString('it-IT');
-            }
-          } catch (error) {
-            console.error("Error parsing timestamp:", error, match.timestamp);
-            displayedDate = 'Error';
-          }
-        }
-
-        card.innerHTML = `
-          <h3>${match.player1} vs ${match.player2}</h3>
-          <p><strong>Score:</strong> ${match.score1} - ${match.score2}</p>
-          <p><strong>Date:</strong> ${displayedDate}</p>
-        `;
-        sportDiv.appendChild(card);
-      });
-      scoresContainer.appendChild(sportDiv);
-    }
-  });
+      card.innerHTML = `
+        <h3>${match.player1} vs ${match.player2}</h3>
+        <p><strong>Score:</strong> ${match.score1} - ${match.score2}</p>
+        <p><strong>Date:</strong> ${displayedDate}</p>
+      `;
+      sportDiv.appendChild(card);
+    });
+    scoresContainer.appendChild(sportDiv);
+  }
+}
