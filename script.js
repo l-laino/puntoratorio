@@ -13,68 +13,64 @@ fetch(url)
     const sports = {};
 
     data.forEach(row => {
-      const timestamp = row.c[0] ? row.c[0].v : null;   // Get the timestamp
-      const sport = row.c[2] ? row.c[2].v : '';         // Sport is on column C (index 2)
-      const player1 = row.c[3] ? row.c[3].v : '';       // Team 1 name on D (index 3)
-      const score1 = row.c[4] ? row.c[4].v : '';        // Team 1 score on E (index 4)
-      const player2 = row.c[5] ? row.c[5].v : '';       // Team 2 name on F (index 5)
-      const score2 = row.c[6] ? row.c[6].v : '';        // Team 2 score on G (index 6)
+      const timestamp = row.c[0] ? row.c[0].v : null; // Timestamp (column A)
+      const sport = row.c[2] ? row.c[2].v : ''; // Sport (column C)
+      const player1 = row.c[3] ? row.c[3].v : ''; // Player 1 (column D)
+      const score1 = row.c[4] ? row.c[4].v : ''; // Score 1 (column E)
+      const player2 = row.c[5] ? row.c[5].v : ''; // Player 2 (column F)
+      const score2 = row.c[6] ? row.c[6].v : ''; // Score 2 (column G)
+      const formattedDate = row.c[7] ? row.c[7].v : ''; // Date (column H)
 
       if (!sports[sport]) {
         sports[sport] = [];
-    }
-    sports[sport].push({ player1, score1, player2, score2, timestamp });
-});
+      }
+      sports[sport].push({ player1, score1, player2, score2, timestamp, formattedDate });
+    });
 
-for (const sport in sports) {
+    for (const sport in sports) {
       const sportDiv = document.createElement('div');
       sportDiv.innerHTML = `<h2 class="sport-title">${sport}</h2>`;
 
-      // Sort matches by timestamp (most recent first)
       sports[sport].sort((a, b) => {
-        const dateA = a.timestamp ? new Date(a.timestamp) : null;
-        const dateB = b.timestamp ? new Date(b.timestamp) : null;
+        // Prioritize formatted date over timestamp for sorting
+        const dateA = a.formattedDate ? new Date(a.formattedDate) : (a.timestamp ? new Date(a.timestamp) : null);
+        const dateB = b.formattedDate ? new Date(b.formattedDate) : (b.timestamp ? new Date(b.timestamp) : null);
         if (dateA && dateB) {
-            return dateB - dateA;
+          return dateB - dateA;
         } else if (dateA) {
-            return -1; // a is valid, b is not
+          return -1; // a is valid, b is not
         } else if (dateB) {
-            return 1; // b is valid, a is not
+          return 1; // b is valid, a is not
         } else {
-            return 0; // neither is valid
+          return 0; // neither is valid
         }
-    });
+      });
 
       sports[sport].forEach(match => {
         const card = document.createElement('div');
         card.className = 'card';
 
-        let formattedDate = 'N/A'; // Default value
-        if (match.timestamp) {
-            try {
-                // Try different date parsing methods until one works
-                let date = new Date(match.timestamp);
-                if (isNaN(date)) { // Check if the date is invalid after parsing
-                    // Google Sheets returns a different format for dates sometimes. Try this:
-                    const parts = match.timestamp.split(/[/ :]/);
-                    date = new Date(parts[2], parts[0] - 1, parts[1], parts[3], parts[4], parts[5]);
-                }
-                if (!isNaN(date)) { // If date is still not valid after the second try
-                    formattedDate = date.toLocaleDateString('it-IT'); // Format if valid
-                }
-            } catch (error) {
-                console.error("Error parsing date:", error, match.timestamp);
-                formattedDate = 'Error'; // Show "Error" on the website
+        let displayedDate = match.formattedDate || 'N/A'; // Use formatted date if available, else N/A
+
+        if (!displayedDate && match.timestamp) {
+          try {
+            const date = new Date(match.timestamp);
+            if (!isNaN(date)) {
+              displayedDate = date.toLocaleDateString('it-IT');
             }
+          } catch (error) {
+            console.error("Error parsing timestamp:", error, match.timestamp);
+            displayedDate = 'Error';
+          }
         }
 
         card.innerHTML = `
-            <h3>${match.player1} vs ${match.player2}</h3>
-            <p><strong>Score:</strong> ${match.score1} - ${match.score2}</p>
-            <p><strong>Date:</strong> ${formattedDate}</p>
+          <h3>${match.player1} vs ${match.player2}</h3>
+          <p><strong>Score:</strong> ${match.score1} - ${match.score2}</p>
+          <p><strong>Date:</strong> ${displayedDate}</p>
         `;
         sportDiv.appendChild(card);
-    });
-    scoresContainer.appendChild(sportDiv);
-}
+      });
+      scoresContainer.appendChild(sportDiv);
+    }
   });
