@@ -48,37 +48,76 @@ function processScores(data) {
 
 function renderScores(sports) {
   const scoresContainer = document.getElementById('scores-container');
+  if (!scoresContainer) {
+    console.error("Scores container not found in DOM");
+    return;
+  }
+
+  scoresContainer.innerHTML = ''; // Svuota il contenitore
 
   for (const sport in sports) {
     const sportDiv = document.createElement('div');
     sportDiv.innerHTML = `<h2 class="sport-title">${sport}</h2>`;
 
+    // Ordina i dati per data
     sports[sport].sort((a, b) => {
-      const dateA = a.formattedDate ? new Date(a.formattedDate) : (a.timestamp ? new Date(a.timestamp) : null);
-      const dateB = b.formattedDate ? new Date(b.formattedDate) : (b.timestamp ? new Date(b.timestamp) : null);
+      const dateA = a.formattedDate ? parseFormattedDate(a.formattedDate) : parseTimestamp(a.timestamp);
+      const dateB = b.formattedDate ? parseFormattedDate(b.formattedDate) : parseTimestamp(b.timestamp);
       if (dateA && dateB) return dateB - dateA;
       else if (dateA) return -1;
       else if (dateB) return 1;
       else return 0;
     });
 
+    // Crea le card per ogni incontro
     sports[sport].forEach(match => {
       const card = document.createElement('div');
       card.className = 'card';
 
-      let displayedDate = match.formattedDate || 'N/A';
-      if (!displayedDate && match.timestamp) {
-        const date = new Date(match.timestamp);
-        displayedDate = isNaN(date) ? 'Invalid Date' : date.toLocaleDateString('it-IT');
+      // Determina la data da visualizzare
+      let displayedDate = 'N/A';
+      if (match.formattedDate) {
+        displayedDate = match.formattedDate; // Usa la data formattata se disponibile
+      } else if (match.timestamp) {
+        const parsedDate = parseTimestamp(match.timestamp);
+        displayedDate = parsedDate ? parsedDate.toLocaleDateString('it-IT') : 'N/A';
       }
 
-      card.innerHTML = `
-        <h3>${match.player1} vs ${match.player2}</h3>
-        <p><strong>Score:</strong> ${match.score1} - ${match.score2}</p>
-        <p><strong>Date:</strong> ${displayedDate}</p>
-      `;
+      card.className = 'card col-md-4'; // Colonne di Bootstrap (3 card per riga su schermi medi)
+
+card.innerHTML = `
+  <div class="card-body">
+    <h3 class="card-title">${match.player1} vs ${match.player2}</h3>
+    <p class="card-text"><strong>Score:</strong> ${match.score1} - ${match.score2}</p>
+    <p class="card-text"><strong>Date:</strong> ${displayedDate}</p>
+  </div>
+`;
+
       sportDiv.appendChild(card);
     });
+
     scoresContainer.appendChild(sportDiv);
+  }
+}
+
+// Funzione per parsare i timestamp
+function parseTimestamp(timestamp) {
+  try {
+    const date = new Date(timestamp);
+    return isNaN(date) ? null : date;
+  } catch (error) {
+    console.error("Error parsing timestamp:", error, timestamp);
+    return null;
+  }
+}
+
+// Funzione per parsare le date formattate (giorno/mese/anno)
+function parseFormattedDate(formattedDate) {
+  try {
+    const [day, month, year] = formattedDate.split('/').map(num => parseInt(num, 10));
+    return new Date(year, month - 1, day); // JavaScript usa mesi da 0 a 11
+  } catch (error) {
+    console.error("Error parsing formatted date:", error, formattedDate);
+    return null;
   }
 }
