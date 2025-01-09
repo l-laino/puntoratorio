@@ -60,21 +60,21 @@ function renderScores(sports) {
     return;
   }
 
-  scoresContainer.innerHTML = ""; // Svuota il contenitore
+  scoresContainer.innerHTML = ""; // Clear the container
 
   for (const sport in sports) {
     const sportDiv = document.createElement("div");
     sportDiv.innerHTML = `<h2 class="sport-title">${sport}</h2>`;
 
-    // Ordina i dati per data
+    // Loop through matches for each sport
     sports[sport].forEach((match) => {
       const card = document.createElement("div");
-      card.className = "card col-md-4"; // Utilizza Bootstrap per il layout delle card
+      card.className = "card col-md-4"; // Use Bootstrap classes for layout
 
-      // Determina la data da visualizzare
+      // Determine the displayed date
       let displayedDate = "N/A";
       if (match.formattedDate) {
-        displayedDate = match.formattedDate; // Usa la data formattata se disponibile
+        displayedDate = match.formattedDate; // Use the formatted date if available
       } else if (match.timestamp) {
         const parsedDate = parseTimestamp(match.timestamp);
         displayedDate = parsedDate
@@ -82,49 +82,42 @@ function renderScores(sports) {
           : "N/A";
       }
 
-      card.innerHTML = 
+      // Properly formatted HTML using template literals
+      card.innerHTML = `
         <div class="card-body">
           <h3 class="card-title">${match.player1} vs ${match.player2}</h3>
           <p class="card-text"><strong>Score:</strong> ${match.score1} - ${match.score2}</p>
           <p class="card-text"><strong>Date:</strong> ${displayedDate}</p>
         </div>
-      ;
+      `;
       sportDiv.appendChild(card);
     });
 
-    // Funzione per parsare i timestamp
-    function parseTimestamp(timestamp) {
-      try {
-        const date = new Date(timestamp);
-        return isNaN(date) ? null : date;
-      } catch (error) {
-        console.error("Error parsing timestamp:", error, timestamp);
-        return null;
-      }
-    }
+    // Append the sport div to the container
+    scoresContainer.appendChild(sportDiv);
   }
+}
 
-  // Funzione per parsare i timestamp
-  function parseTimestamp(timestamp) {
-    try {
-      const date = new Date(timestamp);
-      return isNaN(date) ? null : date;
-    } catch (error) {
-      console.error("Error parsing timestamp:", error, timestamp);
-      return null;
-    }
+// Function to parse timestamps
+function parseTimestamp(timestamp) {
+  try {
+    const date = new Date(timestamp);
+    return isNaN(date) ? null : date;
+  } catch (error) {
+    console.error("Error parsing timestamp:", error, timestamp);
+    return null;
   }
+}
 
-  // Funzione per parsare le date formattate (giorno/mese/anno)
-  function parseFormattedDate(formattedDate) {
-    try {
-      const [day, month, year] = formattedDate
-        .split("/")
-        .map((num) => parseInt(num, 10));
-      return new Date(day, month - 1, year); // JavaScript usa mesi da 0 a 11
-    } catch (error) {
-      console.error("Error parsing formatted date:", error, formattedDate);
-      return null;
-    }
+// Function to parse formatted dates (day/month/year)
+function parseFormattedDate(formattedDate) {
+  try {
+    const [day, month, year] = formattedDate
+      .split("/")
+      .map((num) => parseInt(num, 10));
+    return new Date(year, month - 1, day); // JavaScript uses months from 0 to 11
+  } catch (error) {
+    console.error("Error parsing formatted date:", error, formattedDate);
+    return null;
   }
 }
